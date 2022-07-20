@@ -1,0 +1,46 @@
+Import-Module Remotedesktop 
+
+Get-rdusersession -CollectionName CollectionName -ConnectionBroker ConnectionBroker.FQDN.com | Sort-Object UserName
+
+
+function Select-TextItem 
+{ 
+PARAM  
+( 
+    [Parameter(Mandatory=$true)] 
+    $options, 
+    $displayProperty 
+) 
+ 
+    [int]$optionPrefix = 1 
+    # Create menu list 
+    foreach ($option in $options) 
+    { 
+        if ($displayProperty -eq $null) 
+        { 
+            Write-Host ("{0,3}: {1}" -f $optionPrefix,$option) 
+        } 
+        else 
+        { 
+            Write-Host ("{0,3}: {1}" -f $optionPrefix,$option.$displayProperty) 
+        } 
+        $optionPrefix++ 
+    } 
+    Write-Host ("{0,3}: {1}" -f 0,"To cancel")  
+    [int]$response = Read-Host "Select which server to Shadow" 
+    $val = $null 
+    if ($response -gt 0 -and $response -le $options.Count) 
+    { 
+        $val = $options[$response-1] 
+    } 
+    return $val 
+}    
+ 
+$values = "server1.fqdn.com","server2.fqdn.com","server3.fqdn.com","etc..."
+$val = Select-TextItem $values 
+$val 
+
+$sessionid=Read-Host -Prompt "Please input session number to shadow"
+
+
+Mstsc.exe /V:$val /shadow:$sessionid /control /noConsentPrompt  
